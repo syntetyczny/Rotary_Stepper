@@ -3,9 +3,9 @@
 #include <LiquidCrystal_I2C.h>
 #include <Encoder.h>
 
-#define BUTTON_ROTARY A3
-#define ENCODER_A A2
-#define ENCODER_B A1
+#define BUTTON_ROTARY PE6
+#define ENCODER_A PD3
+#define ENCODER_B PD2
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
