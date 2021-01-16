@@ -3,9 +3,9 @@
 #include <LiquidCrystal_I2C.h>
 #include <Encoder.h>
 
-#define BUTTON_ROTARY PE6
-#define ENCODER_A PD3
-#define ENCODER_B PD2
+#define BUTTON_ROTARY 7
+#define ENCODER_A 0
+#define ENCODER_B 1 
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
@@ -17,8 +17,8 @@ Encoder EncoderKnob(ENCODER_A, ENCODER_B);
 
 int8_t counter = 0;
 int8_t counterPreviousState = 0;
-int8_t currentStateCLK;
-int8_t previousStateCLK;
+long currentStateCLK = -999;
+long previousStateCLK = -999;
 
 void screen_1()
 {
@@ -100,16 +100,16 @@ void loop() {
       counter--;
       if(counter < 0) counter = 3; 
 //      lcd.clear();
-//      lcd.setCursor(2, 3);
-//      lcd.print(counter);
+      lcd.setCursor(2, 3);
+      lcd.print(counter);
     }
     else if(currentStateCLK > previousStateCLK)
     {
       counter++;
       if(counter > 3) counter = 0;
 //      lcd.clear();
-//      lcd.setCursor(2, 3);
-//      lcd.print(counter);
+      lcd.setCursor(2, 3);
+      lcd.print(counter);
    }
     screen_1();
     counterPreviousState = counter;
