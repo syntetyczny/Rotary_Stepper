@@ -19,14 +19,17 @@ int8_t counter = 0;
 int8_t counterPreviousState = 0;
 long currentStateCLK = -999;
 long previousStateCLK = -999;
+volatile byte button_state = 0;
+void button_high(void);
+void screen_start(void);
 
 void screen_1()
 {
 //  lcd.clear();
   lcd.setCursor(2, 0);
-  lcd.print("Start");
+  lcd.print("Start   ");
   lcd.setCursor(2, 1);
-  lcd.print("Stop");
+  lcd.print("Stop    ");
   lcd.setCursor(2, 2);
   lcd.print("Settings");
   if(counter != counterPreviousState)
@@ -41,8 +44,45 @@ void screen_1()
     lcd.setCursor(0, counter);
     lcd.print(">");    
   }
- 
+
+  if(1 == button_state)
+  {
+    switch(counter)
+    {
+      case 0:
+        screen_start();
+        break;
+      default:
+        break;
+    }
+  }
+
 }
+
+void screen_start()
+{
+//  lcd.clear();
+  lcd.setCursor(2, 0);
+  lcd.print("Stop    ");
+  lcd.setCursor(2, 1);
+  lcd.print("Stoper   ");
+  lcd.setCursor(2, 2);
+  lcd.print("Settings");
+  if(counter != counterPreviousState)
+  {
+    lcd.setCursor(0, counter);
+    lcd.print(">");
+    lcd.setCursor(0, counterPreviousState);
+    lcd.print(" ");
+  }
+  else if((counter == 0)&&(counterPreviousState == 0))
+  {
+    lcd.setCursor(0, counter);
+    lcd.print(">");    
+  }
+  button_state = 0;
+}
+
 
 enum MENU_POS
 {
@@ -67,7 +107,8 @@ void setup() {
 //  pinMode (ENCODER_A,INPUT_PULLUP);
 //  pinMode (ENCODER_B, INPUT_PULLUP);
 //  previousStateCLK = digitalRead(ENCODER_A);
-  
+  pinMode(BUTTON_ROTARY, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_ROTARY),button_high, RISING);
   // put your setup code here, to run once:
   lcd.init();
   lcd.backlight();  
@@ -115,4 +156,15 @@ void loop() {
     counterPreviousState = counter;
   }
   previousStateCLK = currentStateCLK;
+//  if(!digitalRead(BUTTON_ROTARY)) button_high();
+
+  lcd.setCursor(4,3);
+  lcd.print(button_state);
+ 
+
+}
+
+void button_high()
+{
+ button_state++;
 }
