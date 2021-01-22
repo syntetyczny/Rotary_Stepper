@@ -21,14 +21,15 @@ long currentStateCLK = -999;
 long previousStateCLK = -999;
 volatile byte button_state = 0;
 void button_high(void);
+void screen_start(void);
 
 void screen_1()
 {
 //  lcd.clear();
   lcd.setCursor(2, 0);
-  lcd.print("Start");
+  lcd.print("Start   ");
   lcd.setCursor(2, 1);
-  lcd.print("Stop");
+  lcd.print("Stop    ");
   lcd.setCursor(2, 2);
   lcd.print("Settings");
   if(counter != counterPreviousState)
@@ -43,8 +44,45 @@ void screen_1()
     lcd.setCursor(0, counter);
     lcd.print(">");    
   }
- 
+
+  if(1 == button_state)
+  {
+    switch(counter)
+    {
+      case 0:
+        screen_start();
+        break;
+      default:
+        break;
+    }
+  }
+
 }
+
+void screen_start()
+{
+//  lcd.clear();
+  lcd.setCursor(2, 0);
+  lcd.print("Stop    ");
+  lcd.setCursor(2, 1);
+  lcd.print("Stoper   ");
+  lcd.setCursor(2, 2);
+  lcd.print("Settings");
+  if(counter != counterPreviousState)
+  {
+    lcd.setCursor(0, counter);
+    lcd.print(">");
+    lcd.setCursor(0, counterPreviousState);
+    lcd.print(" ");
+  }
+  else if((counter == 0)&&(counterPreviousState == 0))
+  {
+    lcd.setCursor(0, counter);
+    lcd.print(">");    
+  }
+  button_state = 0;
+}
+
 
 enum MENU_POS
 {
