@@ -7,6 +7,8 @@
 #define ENCODER_A 0
 #define ENCODER_B 1 
 
+#define LCD_YOFFSET 1
+
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 //9 pin is DIR, 8 is PUL in M542 Stepper driver
@@ -22,6 +24,40 @@ long previousStateCLK = -999;
 volatile byte button_state = 0;
 void button_high(void);
 void screen_start(void);
+void screen_pos_pointer(void);
+
+enum MENU_POS
+{
+ MAIN,
+ MAIN_START,
+ MAIN_CONTINOUS,
+ MAIN_STEPS,
+ MAIN_SETTINGS,
+ MAIN_SETTINGS_STEPS,
+ MAIN_SETTINGS_ACCELERATION,
+ MAIN_SETTINGS_SPEED,
+ MAIN_SETTINGS_MODE,
+ MAIN_SETTINGS_MODE_STEP,
+ MAIN_SETTINGS_MODE_CONTINOUS
+};
+
+enum MENU_POS menu_status = MAIN;
+
+void screen_pos_pointer()
+{
+  if(counter != counterPreviousState)
+  {
+    lcd.setCursor(0, counter-LCD_YOFFSET);
+    lcd.print(">");
+    lcd.setCursor(0, counterPreviousState-LCD_YOFFSET);
+    lcd.print(" ");
+  }
+  else if((counter == 0)&&(counterPreviousState == 0))
+  {
+    lcd.setCursor(0, counter-LCD_YOFFSET);
+    lcd.print(">");    
+  } 
+}
 
 void screen_1()
 {
@@ -32,31 +68,6 @@ void screen_1()
   lcd.print("Stop    ");
   lcd.setCursor(2, 2);
   lcd.print("Settings");
-  if(counter != counterPreviousState)
-  {
-    lcd.setCursor(0, counter);
-    lcd.print(">");
-    lcd.setCursor(0, counterPreviousState);
-    lcd.print(" ");
-  }
-  else if((counter == 0)&&(counterPreviousState == 0))
-  {
-    lcd.setCursor(0, counter);
-    lcd.print(">");    
-  }
-
-  if(1 == button_state)
-  {
-    switch(counter)
-    {
-      case 0:
-        screen_start();
-        break;
-      default:
-        break;
-    }
-  }
-
 }
 
 void screen_start()
@@ -68,29 +79,7 @@ void screen_start()
   lcd.print("Stoper   ");
   lcd.setCursor(2, 2);
   lcd.print("Settings");
-  if(counter != counterPreviousState)
-  {
-    lcd.setCursor(0, counter);
-    lcd.print(">");
-    lcd.setCursor(0, counterPreviousState);
-    lcd.print(" ");
-  }
-  else if((counter == 0)&&(counterPreviousState == 0))
-  {
-    lcd.setCursor(0, counter);
-    lcd.print(">");    
-  }
-  button_state = 0;
 }
-
-
-enum MENU_POS
-{
- POS_1,
- POS_2,
- POS_3,
- POS_4
-};
 
 void run_motor_countinous()
 {
@@ -120,18 +109,28 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-/*  int MenuPosition = EncoderKnob.read() / 4;
-  if(MenuPosition < 1)
-  {
-    EncoderKnob.write(16);
-    MenuPosition = 4;
-  }
-  if(MenuPosition > 4)
-  {
-   EncoderKnob.write(0);
-   MenuPosition = 0;
-  }
-*/
+
+      lcd.setCursor(4,3);
+      lcd.print(button_state);
+ 
+    if(HIGH == button_state){
+      if(MAIN == menu_status)
+      {
+        switch(counter)
+        {
+          case MAIN_START:
+            screen_start();
+            button_state = LOW;            
+            break;
+          default:
+            screen_1();
+            button_state = LOW;
+        }        
+      }
+    }
+
+
+
 
   currentStateCLK = EncoderKnob.read()/4 ;
   if(currentStateCLK != previousStateCLK)
@@ -139,32 +138,27 @@ void loop() {
     if(currentStateCLK < previousStateCLK)
     {
       counter--;
-      if(counter < 0) counter = 3; 
-//      lcd.clear();
+      if(counter < 1) counter = 4; 
+
       lcd.setCursor(2, 3);
       lcd.print(counter);
     }
     else if(currentStateCLK > previousStateCLK)
     {
       counter++;
-      if(counter > 3) counter = 0;
-//      lcd.clear();
+      if(counter > 4) counter = 1;
+
       lcd.setCursor(2, 3);
       lcd.print(counter);
-   }
-    screen_1();
-    counterPreviousState = counter;
+    }
+  screen_pos_pointer(); 
+  counterPreviousState = counter;
+
   }
   previousStateCLK = currentStateCLK;
-//  if(!digitalRead(BUTTON_ROTARY)) button_high();
-
-  lcd.setCursor(4,3);
-  lcd.print(button_state);
- 
-
 }
 
 void button_high()
 {
- button_state++;
+ button_state = !button_state;
 }
