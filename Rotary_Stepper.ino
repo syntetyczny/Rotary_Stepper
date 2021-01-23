@@ -8,6 +8,7 @@
 #define ENCODER_B 1 
 
 #define LCD_YOFFSET 1
+#define LCD_PS_POSITION 14
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
@@ -72,7 +73,7 @@ void screen_1()
 //  lcd.clear();
   lcd.setCursor(2, 0);
   lcd.print("Start   ");
-  lcd.setCursor(10,0);
+  lcd.setCursor(LCD_PS_POSITION,0);
   lcd.print(continous_percent);
   lcd.setCursor(18,0);
   lcd.print("%");
@@ -85,21 +86,39 @@ void screen_start()
 //  lcd.clear();
   lcd.setCursor(2, 0);
   lcd.print("Stop    ");
-  lcd.setCursor(10,0);
+  lcd.setCursor(LCD_PS_POSITION,0);
   lcd.print("   ");
   lcd.setCursor(2, 1);
   lcd.print("         ");
 
   int encoder_state = EncoderKnob.read();
-
+  int current_encoder_state = 0;
+  EncoderKnob.write(current_encoder_state);
+  int previous_encoder_state = 0;
   if(CONTINOUS == motor_mode)
   {
   do{
     lcd.setCursor(4,3);
     lcd.print(button_state);
-    lcd.setCursor(10,0);
-    continous_percent = EncoderKnob.read()/4;
-    continous_percent %= 100;
+    lcd.setCursor(LCD_PS_POSITION,0);
+    current_encoder_state = EncoderKnob.read()/4;
+    if(current_encoder_state != previous_encoder_state)
+    {
+    if(current_encoder_state > previous_encoder_state)
+    {
+      continous_percent++;
+      if(continous_percent > 100) continous_percent = 100;
+    }
+    if(current_encoder_state < previous_encoder_state)
+    {
+      continous_percent--;
+      if(continous_percent > 254) continous_percent = 0;
+    }
+    }
+
+    previous_encoder_state = current_encoder_state;
+    lcd.print("   ");
+    lcd.setCursor(LCD_PS_POSITION,0);
     lcd.print(continous_percent);
     lcd.setCursor(18,0);
     lcd.print("%");
