@@ -17,7 +17,8 @@ AccelStepper stepper(1, 8, 9);
 //Rottary encoder
 Encoder EncoderKnob(ENCODER_A, ENCODER_B);
 
-int8_t counter = 0;
+uint8_t counter = 0;
+uint8_t continous_percent = 100;
 int8_t counterPreviousState = 0;
 long currentStateCLK = -999;
 long previousStateCLK = -999;
@@ -41,7 +42,14 @@ enum MENU_POS
  MAIN_SETTINGS_MODE_CONTINOUS
 };
 
+enum MOTOR_MODES
+{
+  CONTINOUS,
+  STEP
+};
+
 enum MENU_POS menu_status = MAIN;
+enum MOTOR_MODES motor_mode = CONTINOUS;
 
 void screen_pos_pointer()
 {
@@ -64,9 +72,11 @@ void screen_1()
 //  lcd.clear();
   lcd.setCursor(2, 0);
   lcd.print("Start   ");
+  lcd.setCursor(10,0);
+  lcd.print(continous_percent);
+  lcd.setCursor(18,0);
+  lcd.print("%");
   lcd.setCursor(2, 1);
-  lcd.print("Stop    ");
-  lcd.setCursor(2, 2);
   lcd.print("Settings");
 }
 
@@ -75,10 +85,27 @@ void screen_start()
 //  lcd.clear();
   lcd.setCursor(2, 0);
   lcd.print("Stop    ");
+  lcd.setCursor(10,0);
+  lcd.print("   ");
   lcd.setCursor(2, 1);
-  lcd.print("Stoper   ");
-  lcd.setCursor(2, 2);
-  lcd.print("Settings");
+  lcd.print("         ");
+
+  if(CONTINOUS == motor_mode)
+  {
+  do{
+    lcd.setCursor(4,3);
+    lcd.print(button_state);
+    lcd.setCursor(10,0);
+    continous_percent = EncoderKnob.read()/4;
+    continous_percent %= 100;
+    lcd.print(continous_percent);
+    lcd.setCursor(18,0);
+    lcd.print("%");
+   
+  }while(LOW == button_state);
+  button_state = LOW;
+  }
+screen_1();
 }
 
 void run_motor_countinous()
@@ -110,21 +137,20 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
-      lcd.setCursor(4,3);
-      lcd.print(button_state);
- 
+    lcd.setCursor(4,3);
+    lcd.print(button_state);
+
     if(HIGH == button_state){
+      button_state = LOW;
       if(MAIN == menu_status)
       {
         switch(counter)
         {
           case MAIN_START:
-            screen_start();
-            button_state = LOW;            
-            break;
+            screen_start();            
+            break; 
           default:
             screen_1();
-            button_state = LOW;
         }        
       }
     }
@@ -138,7 +164,7 @@ void loop() {
     if(currentStateCLK < previousStateCLK)
     {
       counter--;
-      if(counter < 1) counter = 4; 
+      counter %=4 ; 
 
       lcd.setCursor(2, 3);
       lcd.print(counter);
@@ -146,7 +172,7 @@ void loop() {
     else if(currentStateCLK > previousStateCLK)
     {
       counter++;
-      if(counter > 4) counter = 1;
+      counter %= 4;
 
       lcd.setCursor(2, 3);
       lcd.print(counter);
