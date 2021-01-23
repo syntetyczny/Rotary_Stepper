@@ -90,6 +90,8 @@ void screen_start()
   lcd.setCursor(2, 1);
   lcd.print("         ");
 
+  int encoder_state = EncoderKnob.read();
+
   if(CONTINOUS == motor_mode)
   {
   do{
@@ -104,6 +106,7 @@ void screen_start()
    
   }while(LOW == button_state);
   button_state = LOW;
+  EncoderKnob.write(encoder_state);
   }
 screen_1();
 }
